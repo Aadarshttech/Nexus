@@ -201,6 +201,7 @@ function LoadingScreen() {
 /* ───────────────────────── 2. Menu Screen (Accordion Gallery) ───────────────────────── */
 function MenuScreen({ onSelect }: { onSelect: (comp: ComponentItem) => void }) {
     const [hoveredId, setHoveredId] = useState<string | null>(null);
+    const lastHoverTime = useRef<number>(0);
 
     return (
         <motion.div
@@ -228,7 +229,7 @@ function MenuScreen({ onSelect }: { onSelect: (comp: ComponentItem) => void }) {
             </header>
 
             {/* Expanding Flex Gallery */}
-            <div className="flex-1 flex flex-col md:flex-row w-full h-[100dvh]">
+            <div className="flex-1 flex flex-col md:flex-row w-full h-[100dvh] gap-3 md:gap-0 p-4 pt-24 pb-6 md:p-0">
                 {COMPONENTS.map((comp, i) => {
                     const isHovered = hoveredId === comp.id;
                     const isAnyHovered = hoveredId !== null;
@@ -236,15 +237,29 @@ function MenuScreen({ onSelect }: { onSelect: (comp: ComponentItem) => void }) {
                     return (
                         <motion.div
                             key={comp.id}
-                            className={`group relative flex flex-col md:justify-end justify-center overflow-hidden border-b md:border-b-0 md:border-r border-white/5 transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${comp.isAvailable ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                            className={`group relative flex flex-col md:justify-end justify-center overflow-hidden rounded-3xl md:rounded-none border md:border-0 md:border-r border-white/10 md:border-white/5 transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${comp.isAvailable ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                             style={{
                                 flexGrow: isHovered ? 4 : isAnyHovered ? 0.5 : 1,
                                 flexBasis: 0,
                                 backgroundColor: isHovered ? `${comp.color}15` : '#050507'
                             }}
-                            onMouseEnter={() => comp.isAvailable && setHoveredId(comp.id)}
+                            onMouseEnter={() => {
+                                if (comp.isAvailable && hoveredId !== comp.id) {
+                                    setHoveredId(comp.id);
+                                    lastHoverTime.current = Date.now();
+                                }
+                            }}
                             onMouseLeave={() => setHoveredId(null)}
-                            onClick={() => comp.isAvailable && (hoveredId === comp.id ? onSelect(comp) : setHoveredId(comp.id))}
+                            onClick={() => {
+                                if (comp.isAvailable) {
+                                    if (hoveredId === comp.id && Date.now() - lastHoverTime.current > 300) {
+                                        onSelect(comp);
+                                    } else if (hoveredId !== comp.id) {
+                                        setHoveredId(comp.id);
+                                        lastHoverTime.current = Date.now();
+                                    }
+                                }
+                            }}
                         >
                             {/* Layer 1: Ambient Background Color Glow */}
                             <div
@@ -600,8 +615,8 @@ function ShowcaseScreen({
                         cursor: comp.id === 'scene-4' ? 'pointer' : 'default',
                         opacity: sceneLoaded ? 1 : 0,
                         transform: `scale(${isMobile
-                                ? (comp.id === 'ai-robot' ? 0.75 : comp.id === 'scene-3' ? 0.8 : comp.id === 'scene-4' ? 0.9 : 0.8)
-                                : (comp.id === 'ai-robot' ? 1.15 : comp.id === 'scene-3' ? 1.1 : comp.id === 'scene-4' ? 1.45 : 1.6)
+                            ? (comp.id === 'ai-robot' ? 0.75 : comp.id === 'scene-3' ? 0.8 : comp.id === 'scene-4' ? 0.9 : 0.8)
+                            : (comp.id === 'ai-robot' ? 1.15 : comp.id === 'scene-3' ? 1.1 : comp.id === 'scene-4' ? 1.45 : 1.6)
                             })`,
                         transformOrigin: 'center center',
                         transition: 'transform 1s ease-in-out, opacity 1s ease-in-out'
@@ -621,7 +636,7 @@ function ShowcaseScreen({
             </div>
 
             {/* Typography Overlay — only for 'ai-robot' */}
-            {sceneLoaded && comp.id === 'ai-robot' && (
+            {sceneLoaded && comp.id === 'ai-robot' && !isMobile && (
                 <div style={{
                     position: 'absolute',
                     inset: 0,
@@ -755,7 +770,7 @@ function ShowcaseScreen({
             )}
 
             {/* Dark gradient fades — only for 'ai-robot' */}
-            {comp.id === 'ai-robot' && (
+            {comp.id === 'ai-robot' && !isMobile && (
                 <>
                     <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#030712] via-[#030712]/80 to-transparent z-20 pointer-events-none" />
                     <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#030712] to-transparent z-20 pointer-events-none" />
@@ -763,7 +778,7 @@ function ShowcaseScreen({
             )}
 
             {/* Typography Overlay — exclusively for Neural Core ('scene-2') */}
-            {sceneLoaded && comp.id === 'scene-2' && (
+            {sceneLoaded && comp.id === 'scene-2' && !isMobile && (
                 <div style={{
                     position: 'absolute',
                     inset: 0,
@@ -1045,72 +1060,78 @@ function ShowcaseScreen({
             {comp.id === 'scene-4' && sceneLoaded && (
                 <>
                     {/* Dynamic Dual-Color Background */}
-                    <motion.div
-                        className="absolute inset-0 z-0 pointer-events-none"
-                        style={{
-                            background: `
-                                radial-gradient(circle at top right, rgba(0, 56, 147, 0.25) 0%, transparent 60%),
-                                radial-gradient(circle at bottom left, rgba(220, 20, 60, 0.2) 0%, rgba(3, 7, 18, 1) 80%)
-                            ` // Nepal Blue + Crimson Red blend
-                        }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 1.5, ease: 'easeInOut' }}
-                    />
+                    {!isMobile && (
+                        <motion.div
+                            className="absolute inset-0 z-0 pointer-events-none"
+                            style={{
+                                background: `
+                                    radial-gradient(circle at top right, rgba(0, 56, 147, 0.25) 0%, transparent 60%),
+                                    radial-gradient(circle at bottom left, rgba(220, 20, 60, 0.2) 0%, rgba(3, 7, 18, 1) 80%)
+                                ` // Nepal Blue + Crimson Red blend
+                            }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 1.5, ease: 'easeInOut' }}
+                        />
+                    )}
 
                     {/* Parallax Background Typography */}
-                    <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden">
-                        <motion.span
-                            className="text-transparent font-outfit font-black select-none"
-                            style={{
-                                fontSize: '25vw',
-                                lineHeight: 1,
-                                WebkitTextStroke: '2px rgba(0, 56, 147, 0.2)', // Soft blue outline
-                                letterSpacing: '-0.02em'
-                            }}
-                            initial={{ opacity: 0, scale: 0.9, y: -20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            transition={{ duration: 1.2, ease: 'easeOut' }}
-                        >
-                            NEPAL
-                        </motion.span>
-                    </div>
+                    {!isMobile && (
+                        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden">
+                            <motion.span
+                                className="text-transparent font-outfit font-black select-none"
+                                style={{
+                                    fontSize: '25vw',
+                                    lineHeight: 1,
+                                    WebkitTextStroke: '2px rgba(0, 56, 147, 0.2)', // Soft blue outline
+                                    letterSpacing: '-0.02em'
+                                }}
+                                initial={{ opacity: 0, scale: 0.9, y: -20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                transition={{ duration: 1.2, ease: 'easeOut' }}
+                            >
+                                NEPAL
+                            </motion.span>
+                        </div>
+                    )}
 
                     {/* Stats Card (Left Side) */}
-                    <motion.div
-                        className="absolute left-10 top-1/2 -translate-y-1/2 z-40 w-72 flex flex-col gap-4 pointer-events-none"
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8 }}
-                    >
-                        <div className="bg-gradient-to-br from-black/60 to-black/20 backdrop-blur-md border border-[#dc2626]/30 rounded-2xl p-6 shadow-[0_10px_40px_rgba(220,38,38,0.1)]">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-2 h-8 bg-[#dc2626] rounded-full shadow-[0_0_10px_#dc2626]" />
-                                <div>
-                                    <h3 className="text-white font-outfit font-bold text-xl leading-none uppercase">Nepal cricket Jersey</h3>
-                                    <span className="text-[#dc2626] font-mono text-[10px] tracking-[0.2em] uppercase">Match_Kit_v2</span>
+                    {!isMobile && (
+                        <motion.div
+                            className="absolute left-10 top-1/2 -translate-y-1/2 z-40 w-72 flex flex-col gap-4 pointer-events-none"
+                            initial={{ opacity: 0, x: -50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8 }}
+                        >
+                            <div className="bg-gradient-to-br from-black/60 to-black/20 backdrop-blur-md border border-[#dc2626]/30 rounded-2xl p-6 shadow-[0_10px_40px_rgba(220,38,38,0.1)]">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <div className="w-2 h-8 bg-[#dc2626] rounded-full shadow-[0_0_10px_#dc2626]" />
+                                    <div>
+                                        <h3 className="text-white font-outfit font-bold text-xl leading-none uppercase">Nepal cricket Jersey</h3>
+                                        <span className="text-[#dc2626] font-mono text-[10px] tracking-[0.2em] uppercase">Match_Kit_v2</span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="flex flex-col gap-4">
-                                <div className="flex justify-between items-end border-b border-white/5 pb-2">
-                                    <span className="text-gray-400 font-mono text-xs uppercase">Fabric Tech</span>
-                                    <span className="text-white font-bold text-sm">AeroWeave™</span>
-                                </div>
-                                <div className="flex justify-between items-end border-b border-white/5 pb-2">
-                                    <span className="text-gray-400 font-mono text-xs uppercase">Weight</span>
-                                    <span className="text-white font-bold text-sm">142g <span className="text-gray-600 font-normal">Ultra-light</span></span>
-                                </div>
-                                <div className="flex justify-between items-end">
-                                    <span className="text-gray-400 font-mono text-xs uppercase">Status</span>
-                                    <span className="text-[#dc2626] font-bold text-sm flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 bg-[#dc2626] rounded-full animate-pulse" />
-                                        Equipped
-                                    </span>
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex justify-between items-end border-b border-white/5 pb-2">
+                                        <span className="text-gray-400 font-mono text-xs uppercase">Fabric Tech</span>
+                                        <span className="text-white font-bold text-sm">AeroWeave™</span>
+                                    </div>
+                                    <div className="flex justify-between items-end border-b border-white/5 pb-2">
+                                        <span className="text-gray-400 font-mono text-xs uppercase">Weight</span>
+                                        <span className="text-white font-bold text-sm">142g <span className="text-gray-600 font-normal">Ultra-light</span></span>
+                                    </div>
+                                    <div className="flex justify-between items-end">
+                                        <span className="text-gray-400 font-mono text-xs uppercase">Status</span>
+                                        <span className="text-[#dc2626] font-bold text-sm flex items-center gap-2">
+                                            <span className="w-1.5 h-1.5 bg-[#dc2626] rounded-full animate-pulse" />
+                                            Equipped
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </motion.div>
+                        </motion.div>
+                    )}
 
                     {/* Interaction Hint */}
                     <motion.div
