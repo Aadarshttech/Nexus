@@ -947,7 +947,7 @@ function ShowcaseScreen({
             )}
 
             {/* Neural Core Theme Objects (Replacement for text) */}
-            {comp.id === 'scene-2' && sceneLoaded && (
+            {comp.id === 'scene-2' && sceneLoaded && !isMobile && (
                 <motion.div
                     className="absolute bottom-10 right-10 z-40 flex flex-col items-end gap-4 pointer-events-none"
                     initial={{ opacity: 0, x: 50 }}
@@ -1095,43 +1095,44 @@ function ShowcaseScreen({
                         </div>
                     )}
 
-                    {/* Stats Card (Left Side) */}
-                    {!isMobile && (
-                        <motion.div
-                            className="absolute left-10 top-1/2 -translate-y-1/2 z-40 w-72 flex flex-col gap-4 pointer-events-none"
-                            initial={{ opacity: 0, x: -50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.8 }}
-                        >
-                            <div className="bg-gradient-to-br from-black/60 to-black/20 backdrop-blur-md border border-[#dc2626]/30 rounded-2xl p-6 shadow-[0_10px_40px_rgba(220,38,38,0.1)]">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-2 h-8 bg-[#dc2626] rounded-full shadow-[0_0_10px_#dc2626]" />
-                                    <div>
-                                        <h3 className="text-white font-outfit font-bold text-xl leading-none uppercase">Nepal cricket Jersey</h3>
-                                        <span className="text-[#dc2626] font-mono text-[10px] tracking-[0.2em] uppercase">Match_Kit_v2</span>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col gap-4">
-                                    <div className="flex justify-between items-end border-b border-white/5 pb-2">
-                                        <span className="text-gray-400 font-mono text-xs uppercase">Fabric Tech</span>
-                                        <span className="text-white font-bold text-sm">AeroWeave™</span>
-                                    </div>
-                                    <div className="flex justify-between items-end border-b border-white/5 pb-2">
-                                        <span className="text-gray-400 font-mono text-xs uppercase">Weight</span>
-                                        <span className="text-white font-bold text-sm">142g <span className="text-gray-600 font-normal">Ultra-light</span></span>
-                                    </div>
-                                    <div className="flex justify-between items-end">
-                                        <span className="text-gray-400 font-mono text-xs uppercase">Status</span>
-                                        <span className="text-[#dc2626] font-bold text-sm flex items-center gap-2">
-                                            <span className="w-1.5 h-1.5 bg-[#dc2626] rounded-full animate-pulse" />
-                                            Equipped
-                                        </span>
-                                    </div>
+                    {/* Stats Card (Left Side / Bottom on Mobile) */}
+                    <motion.div
+                        className={`absolute z-40 flex flex-col gap-4 pointer-events-none ${isMobile
+                                ? 'bottom-24 left-1/2 -translate-x-1/2 w-[90%] max-w-sm origin-bottom scale-75'
+                                : 'left-10 top-1/2 -translate-y-1/2 w-72'
+                            }`}
+                        initial={{ opacity: 0, y: isMobile ? 50 : 0, x: isMobile ? 0 : -50 }}
+                        animate={{ opacity: 1, y: isMobile ? 0 : -144, x: 0 }}
+                        transition={{ duration: 0.8 }}
+                    >
+                        <div className="bg-gradient-to-br from-black/60 to-black/20 backdrop-blur-md border border-[#dc2626]/30 rounded-2xl p-6 shadow-[0_10px_40px_rgba(220,38,38,0.1)]">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-2 h-8 bg-[#dc2626] rounded-full shadow-[0_0_10px_#dc2626]" />
+                                <div>
+                                    <h3 className="text-white font-outfit font-bold text-xl leading-none uppercase">Nepal cricket Jersey</h3>
+                                    <span className="text-[#dc2626] font-mono text-[10px] tracking-[0.2em] uppercase">Match_Kit_v2</span>
                                 </div>
                             </div>
-                        </motion.div>
-                    )}
+
+                            <div className="flex flex-col gap-4">
+                                <div className="flex justify-between items-end border-b border-white/5 pb-2">
+                                    <span className="text-gray-400 font-mono text-xs uppercase">Fabric Tech</span>
+                                    <span className="text-white font-bold text-sm">AeroWeave™</span>
+                                </div>
+                                <div className="flex justify-between items-end border-b border-white/5 pb-2">
+                                    <span className="text-gray-400 font-mono text-xs uppercase">Weight</span>
+                                    <span className="text-white font-bold text-sm">142g <span className="text-gray-600 font-normal">Ultra-light</span></span>
+                                </div>
+                                <div className="flex justify-between items-end">
+                                    <span className="text-gray-400 font-mono text-xs uppercase">Status</span>
+                                    <span className="text-[#dc2626] font-bold text-sm flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 bg-[#dc2626] rounded-full animate-pulse" />
+                                        Equipped
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
 
                     {/* Interaction Hint */}
                     <motion.div
